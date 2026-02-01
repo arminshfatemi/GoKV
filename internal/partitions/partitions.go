@@ -79,6 +79,34 @@ func (p *Partition) Get(key string) (any, bool) {
 	}
 }
 
+func (p *Partition) Incr(key string) (int64, error) {
+	// check schema to support Int values
+	if p.Schema != INT {
+		return 0, ErrInvalidSchema
+	}
+
+	m := p.IntData
+
+	// lock
+	p.Lock.Lock()
+	defer p.Lock.Unlock()
+
+	// first check if key exist
+	v, ok := m[key]
+
+	// if not create the key create with value 1
+	if !ok {
+		m[key] = 1
+		return 1, nil
+	}
+
+	// if exist increment it and return response
+	v++
+	m[key] = v
+
+	return v, nil
+}
+
 func (p *Partition) setInt(key string, rawValue []byte) error {
 	intValue, err := strconv.ParseInt(string(rawValue), 10, 64)
 	if err != nil {

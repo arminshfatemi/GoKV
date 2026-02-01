@@ -92,20 +92,19 @@ func parseDel(t [][]byte) (*Command, error) {
 	}, nil
 }
 
-//
-//// INCR P0 key
-//func parseIncr(t [][]byte) (*Command, error) {
-//	if len(t) != 3 {
-//		return nil, ErrWrongArgCount
-//	}
-//
-//	return &Command{
-//		Schema:      CmdIncr,
-//		Partition: string(t[1]),
-//		Key:       string(t[2]),
-//	}, nil
-//}
-//
+// INCR P0 key
+func parseIncr(t [][]byte) (*Command, error) {
+	if len(t) != 3 {
+		return nil, ErrWrongArgCount
+	}
+
+	return &Command{
+		Type:      CmdIncr,
+		Partition: string(t[1]),
+		Key:       string(t[2]),
+	}, nil
+}
+
 //// STATS PARTITION P0
 //func parseStats(t [][]byte) (*Command, error) {
 //	if len(t) != 3 || !bytes.EqualFold(t[1], []byte("PARTITION")) {

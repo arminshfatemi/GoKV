@@ -17,6 +17,7 @@ func init() {
 	addHandler(protocol.CmdDel, delHandler)
 	addHandler(protocol.CmdGet, getHandler)
 	addHandler(protocol.CmdSet, setHandler)
+	addHandler(protocol.CmdIncr, incrHandler)
 }
 
 func addHandler(commandType protocol.CommandType, handler CommandHandler) {
@@ -186,4 +187,31 @@ func delHandler(command *protocol.Command) (ExecutionResult, error) {
 		Type:  ResultInt,
 		Value: count,
 	}, nil
+}
+
+func incrHandler(command *protocol.Command) (ExecutionResult, error) {
+	partitionName := command.Partition
+	key := command.Key
+
+	p, ok := partitions.GetPartition(partitionName)
+	if !ok {
+		return ExecutionResult{
+			Type: ResultNull,
+		}, nil
+	}
+
+	v, err := p.Incr(key)
+	if err != nil {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: err.Error(),
+		}, err
+	}
+
+	r := ExecutionResult{
+		Type:  ResultInt,
+		Value: v,
+	}
+
+	return r, nil
 }
