@@ -5,7 +5,7 @@ import (
 	"GoKV/internal/protocol"
 )
 
-type CommandHandler func(command *protocol.Command) (ExecutionResult, error)
+type CommandHandler func(command *protocol.Command) ExecutionResult
 
 var CommandTable = map[protocol.CommandType]CommandHandler{}
 
@@ -26,7 +26,7 @@ func addHandler(commandType protocol.CommandType, handler CommandHandler) {
 	CommandTable[commandType] = handler
 }
 
-func createPartitionHandler(command *protocol.Command) (ExecutionResult, error) {
+func createPartitionHandler(command *protocol.Command) ExecutionResult {
 	if command.Type != protocol.CmdCreatePartition {
 		panic("createPartitionHandler called with wrong command type")
 	}
@@ -36,7 +36,7 @@ func createPartitionHandler(command *protocol.Command) (ExecutionResult, error) 
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: err.Error(),
-		}, nil
+		}
 	}
 
 	pm, err := partitions.ParsePersistMode(command.PersistMode)
@@ -44,7 +44,7 @@ func createPartitionHandler(command *protocol.Command) (ExecutionResult, error) 
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: err.Error(),
-		}, nil
+		}
 	}
 
 	// create a config
@@ -56,7 +56,7 @@ func createPartitionHandler(command *protocol.Command) (ExecutionResult, error) 
 
 	// create partition
 	if err := partitions.CreatePartition(cfg); err != nil {
-		return ExecutionResult{Type: ResultError, Value: err.Error()}, nil
+		return ExecutionResult{Type: ResultError, Value: err.Error()}
 	}
 
 	// create result
@@ -65,10 +65,10 @@ func createPartitionHandler(command *protocol.Command) (ExecutionResult, error) 
 		Value: "OK",
 	}
 
-	return r, nil
+	return r
 }
 
-func listPartitionHandler(command *protocol.Command) (ExecutionResult, error) {
+func listPartitionHandler(command *protocol.Command) ExecutionResult {
 	if command.Type != protocol.CmdListPartitions {
 		panic("listPartitionHandler called with wrong command type")
 	}
@@ -81,10 +81,10 @@ func listPartitionHandler(command *protocol.Command) (ExecutionResult, error) {
 		Type:  ResultArray,
 		Value: partitionsSlice,
 	}
-	return r, nil
+	return r
 }
 
-func dropPartitionHandler(command *protocol.Command) (ExecutionResult, error) {
+func dropPartitionHandler(command *protocol.Command) ExecutionResult {
 	if command.Type != protocol.CmdDropPartition {
 		panic("dropPartitionHandler called with wrong command type")
 	}
@@ -95,7 +95,7 @@ func dropPartitionHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: err.Error(),
-		}, nil
+		}
 	}
 
 	// create result
@@ -103,10 +103,10 @@ func dropPartitionHandler(command *protocol.Command) (ExecutionResult, error) {
 		Type:  ResultString,
 		Value: "OK",
 	}
-	return r, nil
+	return r
 }
 
-func getHandler(command *protocol.Command) (ExecutionResult, error) {
+func getHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
 	key := command.Key
 
@@ -116,14 +116,14 @@ func getHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: partitions.ErrPartitionNotFound.Error(),
-		}, nil
+		}
 	}
 
 	v, ok := p.Get(key)
 	if !ok {
 		return ExecutionResult{
 			Type: ResultNull,
-		}, nil
+		}
 	}
 
 	rType := ResultString
@@ -136,10 +136,10 @@ func getHandler(command *protocol.Command) (ExecutionResult, error) {
 		Value: v,
 	}
 
-	return r, nil
+	return r
 }
 
-func setHandler(command *protocol.Command) (ExecutionResult, error) {
+func setHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
 	key := command.Key
 	value := command.Value
@@ -149,24 +149,24 @@ func setHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: partitions.ErrPartitionNotFound.Error(),
-		}, nil
+		}
 	}
 
 	if err := p.Set(key, []byte(value)); err != nil {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: err.Error(),
-		}, nil
+		}
 	}
 
 	r := ExecutionResult{
 		Type:  ResultString,
 		Value: "OK",
 	}
-	return r, nil
+	return r
 }
 
-func delHandler(command *protocol.Command) (ExecutionResult, error) {
+func delHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
 	key := command.Key
 
@@ -175,7 +175,7 @@ func delHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: partitions.ErrPartitionNotFound.Error(),
-		}, nil
+		}
 	}
 
 	deleted := p.Del(key)
@@ -188,10 +188,10 @@ func delHandler(command *protocol.Command) (ExecutionResult, error) {
 	return ExecutionResult{
 		Type:  ResultInt,
 		Value: count,
-	}, nil
+	}
 }
 
-func incrHandler(command *protocol.Command) (ExecutionResult, error) {
+func incrHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
 	key := command.Key
 
@@ -200,7 +200,7 @@ func incrHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: partitions.ErrPartitionNotFound.Error(),
-		}, nil
+		}
 	}
 
 	v, err := p.Incr(key)
@@ -208,7 +208,7 @@ func incrHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: err.Error(),
-		}, err
+		}
 	}
 
 	r := ExecutionResult{
@@ -216,10 +216,10 @@ func incrHandler(command *protocol.Command) (ExecutionResult, error) {
 		Value: v,
 	}
 
-	return r, nil
+	return r
 }
 
-func describeHandler(command *protocol.Command) (ExecutionResult, error) {
+func describeHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
 
 	p, ok := partitions.GetPartition(partitionName)
@@ -227,7 +227,7 @@ func describeHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: partitions.ErrPartitionNotFound.Error(),
-		}, nil
+		}
 	}
 
 	v := p.Describe()
@@ -237,10 +237,10 @@ func describeHandler(command *protocol.Command) (ExecutionResult, error) {
 		Value: v,
 	}
 
-	return r, nil
+	return r
 }
 
-func statsHandler(command *protocol.Command) (ExecutionResult, error) {
+func statsHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
 
 	p, ok := partitions.GetPartition(partitionName)
@@ -248,7 +248,7 @@ func statsHandler(command *protocol.Command) (ExecutionResult, error) {
 		return ExecutionResult{
 			Type:  ResultError,
 			Value: partitions.ErrPartitionNotFound.Error(),
-		}, nil
+		}
 	}
 
 	stats := p.Stat()
@@ -256,5 +256,5 @@ func statsHandler(command *protocol.Command) (ExecutionResult, error) {
 	return ExecutionResult{
 		Type:  ResultArray,
 		Value: stats,
-	}, nil
+	}
 }
