@@ -3,12 +3,13 @@ package partitions
 import (
 	"strconv"
 	"sync"
+	"sync/atomic"
 )
 
 type Stats struct {
-	KeysCount   uint64
-	OpsCount    uint64
-	WritesCount uint64
+	KeysCount   atomic.Uint64
+	OpsCount    atomic.Uint64
+	WritesCount atomic.Uint64
 }
 
 type Partition struct {
@@ -34,11 +35,9 @@ func (p *Partition) Set(key string, rawValue []byte) error {
 }
 
 func (p *Partition) Del(key string) bool {
-	p.Lock.Lock()
-	defer p.Lock.Unlock()
-
 	var existed bool
 
+	p.Lock.Lock()
 	switch p.Schema {
 	case INT:
 		_, existed = p.IntData[key]
@@ -51,22 +50,22 @@ func (p *Partition) Del(key string) bool {
 			delete(p.StringData, key)
 		}
 	}
+	p.Lock.Unlock()
 
 	if existed {
-		p.Stats.KeysCount--
-		p.Stats.WritesCount++
+		p.Stats.KeysCount.Add(-1)
+		p.Stats.WritesCount.Add(1)
 	}
-	p.Stats.OpsCount++
+	p.Stats.OpsCount.Add(1)
 
 	return existed
 }
 
 func (p *Partition) Get(key string) (any, bool) {
+	p.Stats.OpsCount.Add(1)
+
 	p.Lock.Lock()
 	defer p.Lock.Unlock()
-
-	p.Stats.OpsCount++
-
 	switch p.Schema {
 	case INT:
 		v, ok := p.IntData[key]
@@ -87,27 +86,24 @@ func (p *Partition) Incr(key string) (int64, error) {
 
 	m := p.IntData
 
-	// lock
 	p.Lock.Lock()
-	defer p.Lock.Unlock()
-
-	// first check if key exist
 	v, ok := m[key]
+	p.Lock.Unlock()
 
 	// if not create the key create with value 1
 	if !ok {
 		m[key] = 1
-		p.Stats.KeysCount++
-		p.Stats.WritesCount++
-		p.Stats.OpsCount++
+		p.Stats.KeysCount.Add(1)
+		p.Stats.WritesCount.Add(1)
+		p.Stats.OpsCount.Add(1)
 		return 1, nil
 	}
 
 	// if exist increment it and return response
 	v++
 	m[key] = v
-	p.Stats.WritesCount++
-	p.Stats.OpsCount++
+	p.Stats.WritesCount.Add(1)
+	p.Stats.OpsCount.Add(1)
 
 	return v, nil
 }
@@ -115,6 +111,8 @@ func (p *Partition) Incr(key string) (int64, error) {
 func (p *Partition) Describe() []string {
 	p.Lock.RLock()
 	defer p.Lock.RUnlock()
+
+	p.Stats.OpsCount.Add(1)
 
 	cfg := p.cfg
 
@@ -128,15 +126,11 @@ func (p *Partition) Describe() []string {
 }
 
 func (p *Partition) Stat() []string {
-	p.Lock.RLock()
-	defer p.Lock.RUnlock()
-
-	stats := p.Stats
-
+	p.Stats.OpsCount.Add(1)
 	return []string{
-		"keyCount", strconv.FormatUint(stats.KeysCount, 10),
-		"opsCount", strconv.FormatUint(stats.OpsCount, 10),
-		"writesCount", strconv.FormatUint(stats.WritesCount, 10),
+		"keyCount", strconv.FormatUint(p.Stats.KeysCount.Load(), 10),
+		"opsCount", strconv.FormatUint(p.Stats.OpsCount.Load(), 10),
+		"writesCount", strconv.FormatUint(p.Stats.WritesCount.Load(), 10),
 	}
 }
 
@@ -147,16 +141,15 @@ func (p *Partition) setInt(key string, rawValue []byte) error {
 	}
 
 	p.Lock.Lock()
-	defer p.Lock.Unlock()
-
 	_, existed := p.IntData[key]
 	p.IntData[key] = intValue
+	p.Lock.Unlock()
 
 	if !existed {
-		p.Stats.KeysCount++
+		p.Stats.KeysCount.Add(1)
 	}
-	p.Stats.WritesCount++
-	p.Stats.OpsCount++
+	p.Stats.WritesCount.Add(1)
+	p.Stats.OpsCount.Add(1)
 
 	return nil
 }
@@ -165,16 +158,15 @@ func (p *Partition) setString(key string, rawValue []byte) error {
 	strValue := string(rawValue)
 
 	p.Lock.Lock()
-	defer p.Lock.Unlock()
-
 	_, existed := p.StringData[key]
 	p.StringData[key] = strValue
+	p.Lock.Unlock()
 
 	if !existed {
-		p.Stats.KeysCount++
+		p.Stats.KeysCount.Add(1)
 	}
-	p.Stats.WritesCount++
-	p.Stats.OpsCount++
+	p.Stats.WritesCount.Add(1)
+	p.Stats.OpsCount.Add(1)
 
 	return nil
 }
