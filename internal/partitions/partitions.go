@@ -136,10 +136,19 @@ func (p *Partition) Stat() []string {
 }
 
 func (p *Partition) Exists(key string) bool {
+	var existed bool
+
 	p.Lock.RLock()
 	defer p.Lock.RUnlock()
-	_, ok := p.IntData[key]
-	return ok
+
+	switch p.Schema {
+	case INT:
+		_, existed = p.IntData[key]
+	case STRING:
+		_, existed = p.StringData[key]
+	}
+
+	return existed
 }
 
 func (p *Partition) setInt(key string, rawValue []byte) error {
