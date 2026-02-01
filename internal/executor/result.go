@@ -8,6 +8,7 @@ const (
 	ResultInt
 	ResultString
 	ResultArray
+	ResultNull
 )
 
 type ExecutionResult struct {

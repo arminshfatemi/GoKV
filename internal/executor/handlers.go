@@ -13,6 +13,10 @@ func init() {
 	addHandler(protocol.CmdCreatePartition, createPartitionHandler)
 	addHandler(protocol.CmdListPartitions, listPartitionHandler)
 	addHandler(protocol.CmdDropPartition, dropPartitionHandler)
+
+	addHandler(protocol.CmdDel, delHandler)
+	addHandler(protocol.CmdGet, getHandler)
+	addHandler(protocol.CmdSet, setHandler)
 }
 
 func addHandler(commandType protocol.CommandType, handler CommandHandler) {
@@ -97,4 +101,89 @@ func dropPartitionHandler(command *protocol.Command) (ExecutionResult, error) {
 		Value: "OK",
 	}
 	return r, nil
+}
+
+func getHandler(command *protocol.Command) (ExecutionResult, error) {
+	partitionName := command.Partition
+	key := command.Key
+
+	// get partition
+	p, ok := partitions.GetPartition(partitionName)
+	if !ok {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: partitions.ErrPartitionNotFound.Error(),
+		}, nil
+	}
+
+	v, ok := p.Get(key)
+	if !ok {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: partitions.ErrKeyNotFound.Error(),
+		}, nil
+	}
+
+	rType := ResultString
+	if p.Schema == partitions.INT {
+		rType = ResultInt
+	}
+
+	r := ExecutionResult{
+		Type:  rType,
+		Value: v,
+	}
+
+	return r, nil
+}
+
+func setHandler(command *protocol.Command) (ExecutionResult, error) {
+	partitionName := command.Partition
+	key := command.Key
+	value := command.Value
+
+	p, ok := partitions.GetPartition(partitionName)
+	if !ok {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: partitions.ErrPartitionNotFound.Error(),
+		}, nil
+	}
+
+	if err := p.Set(key, []byte(value)); err != nil {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: err.Error(),
+		}, nil
+	}
+
+	r := ExecutionResult{
+		Type:  ResultString,
+		Value: "OK",
+	}
+	return r, nil
+}
+
+func delHandler(command *protocol.Command) (ExecutionResult, error) {
+	partitionName := command.Partition
+	key := command.Key
+
+	p, ok := partitions.GetPartition(partitionName)
+	if !ok {
+		return ExecutionResult{
+			Type: ResultNull,
+		}, nil
+	}
+
+	deleted := p.Del(key)
+
+	var count int64
+	if deleted {
+		count = 1
+	}
+
+	return ExecutionResult{
+		Type:  ResultInt,
+		Value: count,
+	}, nil
 }

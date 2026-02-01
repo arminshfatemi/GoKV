@@ -9,4 +9,5 @@ var (
 	ErrInvalidValue       = errors.New("invalid value")
 	ErrInvalidValueType   = errors.New("invalid value type")
 	ErrInvalidPersistMode = errors.New("invalid persist mode")
+	ErrKeyNotFound        = errors.New("key not found")
 )

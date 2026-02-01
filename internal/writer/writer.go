@@ -39,6 +39,9 @@ func WriteResult(w *bufio.Writer, res executor.ExecutionResult) error {
 		}
 		return nil
 
+	case executor.ResultNull:
+		_, err := w.WriteString("$-1\r\n")
+		return err
 	default:
 		_, err := w.WriteString("-ERR unknown result\n")
 		return err

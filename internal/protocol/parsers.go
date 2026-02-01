@@ -37,58 +37,61 @@ func parseList(t [][]byte) (*Command, error) {
 	return &Command{Type: CmdListPartitions}, nil
 }
 
+// // DESCRIBE PARTITION P0
 //
-//// DESCRIBE PARTITION P0
-//func parseDescribe(t [][]byte) (*Command, error) {
-//	if len(t) != 3 || !bytes.EqualFold(t[1], []byte("PARTITION")) {
-//		return nil, ErrWrongArgCount
+//	func parseDescribe(t [][]byte) (*Command, error) {
+//		if len(t) != 3 || !bytes.EqualFold(t[1], []byte("PARTITION")) {
+//			return nil, ErrWrongArgCount
+//		}
+//
+//		return &Command{
+//			Schema:      CmdDescribePartition,
+//			Partition: string(t[2]),
+//		}, nil
 //	}
 //
-//	return &Command{
-//		Schema:      CmdDescribePartition,
-//		Partition: string(t[2]),
-//	}, nil
-//}
-//
-//// SET P0 key value
-//func parseSet(t [][]byte) (*Command, error) {
-//	if len(t) != 4 {
-//		return nil, ErrWrongArgCount
-//	}
-//
-//	return &Command{
-//		Schema:      CmdSet,
-//		Partition: string(t[1]),
-//		Key:       string(t[2]),
-//		Value:     string(t[3]),
-//	}, nil
-//}
-//
-//// GET P0 key
-//func parseGet(t [][]byte) (*Command, error) {
-//	if len(t) != 3 {
-//		return nil, ErrWrongArgCount
-//	}
-//
-//	return &Command{
-//		Schema:      CmdGet,
-//		Partition: string(t[1]),
-//		Key:       string(t[2]),
-//	}, nil
-//}
-//
-//// DEL P0 key
-//func parseDel(t [][]byte) (*Command, error) {
-//	if len(t) != 3 {
-//		return nil, ErrWrongArgCount
-//	}
-//
-//	return &Command{
-//		Schema:      CmdDel,
-//		Partition: string(t[1]),
-//		Key:       string(t[2]),
-//	}, nil
-//}
+
+// SET P0 key value
+func parseSet(t [][]byte) (*Command, error) {
+	if len(t) != 4 {
+		return nil, ErrWrongArgCount
+	}
+
+	return &Command{
+		Type:      CmdSet,
+		Partition: string(t[1]),
+		Key:       string(t[2]),
+		Value:     string(t[3]),
+	}, nil
+}
+
+// GET P0 key
+
+func parseGet(t [][]byte) (*Command, error) {
+	if len(t) != 3 {
+		return nil, ErrWrongArgCount
+	}
+
+	return &Command{
+		Type:      CmdGet,
+		Partition: string(t[1]),
+		Key:       string(t[2]),
+	}, nil
+}
+
+// DEL P0 key
+func parseDel(t [][]byte) (*Command, error) {
+	if len(t) != 3 {
+		return nil, ErrWrongArgCount
+	}
+
+	return &Command{
+		Type:      CmdDel,
+		Partition: string(t[1]),
+		Key:       string(t[2]),
+	}, nil
+}
+
 //
 //// INCR P0 key
 //func parseIncr(t [][]byte) (*Command, error) {
