@@ -88,11 +88,11 @@ func (p *Partition) Incr(key string) (int64, error) {
 
 	p.Lock.Lock()
 	v, ok := m[key]
-	p.Lock.Unlock()
 
 	// if not create the key create with value 1
 	if !ok {
 		m[key] = 1
+		p.Lock.Unlock()
 		p.Stats.KeysCount.Add(1)
 		p.Stats.WritesCount.Add(1)
 		p.Stats.OpsCount.Add(1)
@@ -102,6 +102,7 @@ func (p *Partition) Incr(key string) (int64, error) {
 	// if exist increment it and return response
 	v++
 	m[key] = v
+	p.Lock.Unlock()
 	p.Stats.WritesCount.Add(1)
 	p.Stats.OpsCount.Add(1)
 
