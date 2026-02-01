@@ -172,7 +172,8 @@ func delHandler(command *protocol.Command) (ExecutionResult, error) {
 	p, ok := partitions.GetPartition(partitionName)
 	if !ok {
 		return ExecutionResult{
-			Type: ResultNull,
+			Type:  ResultError,
+			Value: partitions.ErrPartitionNotFound.Error(),
 		}, nil
 	}
 
@@ -196,7 +197,8 @@ func incrHandler(command *protocol.Command) (ExecutionResult, error) {
 	p, ok := partitions.GetPartition(partitionName)
 	if !ok {
 		return ExecutionResult{
-			Type: ResultNull,
+			Type:  ResultError,
+			Value: partitions.ErrPartitionNotFound.Error(),
 		}, nil
 	}
 
