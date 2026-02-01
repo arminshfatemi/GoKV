@@ -122,8 +122,7 @@ func getHandler(command *protocol.Command) (ExecutionResult, error) {
 	v, ok := p.Get(key)
 	if !ok {
 		return ExecutionResult{
-			Type:  ResultError,
-			Value: partitions.ErrKeyNotFound.Error(),
+			Type: ResultNull,
 		}, nil
 	}
 
