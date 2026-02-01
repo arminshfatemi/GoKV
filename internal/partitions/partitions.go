@@ -97,12 +97,17 @@ func (p *Partition) Incr(key string) (int64, error) {
 	// if not create the key create with value 1
 	if !ok {
 		m[key] = 1
+		p.Stats.KeysCount++
+		p.Stats.WritesCount++
+		p.Stats.OpsCount++
 		return 1, nil
 	}
 
 	// if exist increment it and return response
 	v++
 	m[key] = v
+	p.Stats.WritesCount++
+	p.Stats.OpsCount++
 
 	return v, nil
 }
