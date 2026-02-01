@@ -14,6 +14,7 @@ func init() {
 	addHandler(protocol.CmdListPartitions, listPartitionHandler)
 	addHandler(protocol.CmdDropPartition, dropPartitionHandler)
 	addHandler(protocol.CmdDescribePartition, describeHandler)
+	addHandler(protocol.CmdStatsPartition, statsHandler)
 
 	addHandler(protocol.CmdDel, delHandler)
 	addHandler(protocol.CmdGet, getHandler)
@@ -238,4 +239,23 @@ func describeHandler(command *protocol.Command) (ExecutionResult, error) {
 	}
 
 	return r, nil
+}
+
+func statsHandler(command *protocol.Command) (ExecutionResult, error) {
+	partitionName := command.Partition
+
+	p, ok := partitions.GetPartition(partitionName)
+	if !ok {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: partitions.ErrPartitionNotFound.Error(),
+		}, nil
+	}
+
+	stats := p.Stats
+
+	return ExecutionResult{
+		Type:  ResultArray,
+		Value: stats,
+	}, nil
 }

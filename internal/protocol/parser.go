@@ -52,8 +52,8 @@ func (p *Parser) Parse(line []byte) (*Command, error) {
 	case bytes.EqualFold(tokens[0], []byte("INCR")):
 		return parseIncr(tokens)
 
-		//case bytes.EqualFold(tokens[0], []byte("STATS")):
-		//	return parseStats(tokens)
+	case bytes.EqualFold(tokens[0], []byte("STATS")):
+		return parseStats(tokens)
 	}
 
 	return nil, ErrInvalidCommand

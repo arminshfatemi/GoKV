@@ -113,8 +113,8 @@ func (p *Partition) Incr(key string) (int64, error) {
 }
 
 func (p *Partition) Describe() []string {
-	p.Lock.Lock()
-	defer p.Lock.Unlock()
+	p.Lock.RLock()
+	defer p.Lock.RUnlock()
 
 	cfg := p.cfg
 
@@ -125,6 +125,19 @@ func (p *Partition) Describe() []string {
 	}
 
 	return s
+}
+
+func (p *Partition) Stat() []string {
+	p.Lock.RLock()
+	defer p.Lock.RUnlock()
+
+	stats := p.Stats
+
+	return []string{
+		"keyCount", strconv.FormatUint(stats.KeysCount, 10),
+		"opsCount", strconv.FormatUint(stats.OpsCount, 10),
+		"writesCount", strconv.FormatUint(stats.WritesCount, 10),
+	}
 }
 
 func (p *Partition) setInt(key string, rawValue []byte) error {

@@ -102,14 +102,14 @@ func parseIncr(t [][]byte) (*Command, error) {
 	}, nil
 }
 
-//// STATS PARTITION P0
-//func parseStats(t [][]byte) (*Command, error) {
-//	if len(t) != 3 || !bytes.EqualFold(t[1], []byte("PARTITION")) {
-//		return nil, ErrWrongArgCount
-//	}
-//
-//	return &Command{
-//		Schema:      CmdStatsPartition,
-//		Partition: string(t[2]),
-//	}, nil
-//}
+// STATS PARTITION P0
+func parseStats(t [][]byte) (*Command, error) {
+	if len(t) != 3 || !bytes.EqualFold(t[1], []byte("PARTITION")) {
+		return nil, ErrWrongArgCount
+	}
+
+	return &Command{
+		Type:      CmdStatsPartition,
+		Partition: string(t[2]),
+	}, nil
+}
