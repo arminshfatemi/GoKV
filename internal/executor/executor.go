@@ -22,6 +22,6 @@ func NewExecutor(command *protocol.Command) (*Executor, error) {
 	return e, nil
 }
 
-func (e *Executor) Execute() (ExecutionResult, error) {
+func (e *Executor) Execute() ExecutionResult {
 	return e.handler(e.command)
 }

@@ -53,7 +53,7 @@ func (p *Partition) Del(key string) bool {
 	p.Lock.Unlock()
 
 	if existed {
-		p.Stats.KeysCount.Add(-1)
+		p.Stats.KeysCount.Add(^uint64(0))
 		p.Stats.WritesCount.Add(1)
 	}
 	p.Stats.OpsCount.Add(1)
@@ -133,6 +133,13 @@ func (p *Partition) Stat() []string {
 		"opsCount", strconv.FormatUint(p.Stats.OpsCount.Load(), 10),
 		"writesCount", strconv.FormatUint(p.Stats.WritesCount.Load(), 10),
 	}
+}
+
+func (p *Partition) Exists(key string) bool {
+	p.Lock.RLock()
+	defer p.Lock.RUnlock()
+	_, ok := p.IntData[key]
+	return ok
 }
 
 func (p *Partition) setInt(key string, rawValue []byte) error {

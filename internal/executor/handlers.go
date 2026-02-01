@@ -20,6 +20,7 @@ func init() {
 	addHandler(protocol.CmdGet, getHandler)
 	addHandler(protocol.CmdSet, setHandler)
 	addHandler(protocol.CmdIncr, incrHandler)
+	addHandler(protocol.CmdExists, existsHandler)
 }
 
 func addHandler(commandType protocol.CommandType, handler CommandHandler) {
@@ -257,4 +258,31 @@ func statsHandler(command *protocol.Command) ExecutionResult {
 		Type:  ResultArray,
 		Value: stats,
 	}
+}
+
+func existsHandler(command *protocol.Command) ExecutionResult {
+	partitionName := command.Partition
+	key := command.Key
+
+	p, ok := partitions.GetPartition(partitionName)
+	if !ok {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: partitions.ErrPartitionNotFound.Error(),
+		}
+	}
+
+	e := p.Exists(key)
+
+	var count int64
+	if e {
+		count = 1
+	}
+
+	r := ExecutionResult{
+		Type:  ResultInt,
+		Value: count,
+	}
+
+	return r
 }

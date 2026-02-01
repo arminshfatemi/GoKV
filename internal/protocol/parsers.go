@@ -113,3 +113,17 @@ func parseStats(t [][]byte) (*Command, error) {
 		Partition: string(t[2]),
 	}, nil
 }
+
+// TODO: add support for multiple keys
+// EXISTS key
+func parseExists(t [][]byte) (*Command, error) {
+	if len(t) <= 2 {
+		return nil, ErrWrongArgCount
+	}
+
+	return &Command{
+		Type:      CmdExists,
+		Partition: string(t[1]),
+		Key:       string(t[2]),
+	}, nil
+}

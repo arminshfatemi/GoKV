@@ -13,6 +13,7 @@ const (
 	CmdDel
 	CmdIncr
 	CmdStatsPartition
+	CmdExists
 )
 
 type Command struct {

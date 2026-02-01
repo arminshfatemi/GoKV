@@ -40,10 +40,7 @@ func handleConnection(conn net.Conn) {
 			writer.WriteString("-ERR " + err.Error() + "\n")
 		}
 
-		result, err := e.Execute()
-		if err != nil {
-			writer.WriteString("-ERR " + err.Error() + "\n")
-		}
+		result := e.Execute()
 
 		if err := writer2.WriteResult(writer, result); err != nil {
 			panic(e)

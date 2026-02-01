@@ -21,6 +21,7 @@ var (
 	cmdDEL      = []byte("DEL")
 	cmdINCR     = []byte("INCR")
 	cmdSTATS    = []byte("STATS")
+	cmdEXISTS   = []byte("EXISTS")
 )
 
 type Parser struct {
@@ -66,6 +67,9 @@ func (p *Parser) Parse(line []byte) (*Command, error) {
 
 	case bytes.EqualFold(tokens[0], cmdSTATS):
 		return parseStats(tokens)
+
+	case bytes.EqualFold(tokens[0], cmdEXISTS):
+		return parseExists(tokens)
 	}
 
 	return nil, ErrInvalidCommand
