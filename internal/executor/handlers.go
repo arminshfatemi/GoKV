@@ -13,6 +13,7 @@ func init() {
 	addHandler(protocol.CmdCreatePartition, createPartitionHandler)
 	addHandler(protocol.CmdListPartitions, listPartitionHandler)
 	addHandler(protocol.CmdDropPartition, dropPartitionHandler)
+	addHandler(protocol.CmdDescribePartition, describeHandler)
 
 	addHandler(protocol.CmdDel, delHandler)
 	addHandler(protocol.CmdGet, getHandler)
@@ -212,6 +213,27 @@ func incrHandler(command *protocol.Command) (ExecutionResult, error) {
 
 	r := ExecutionResult{
 		Type:  ResultInt,
+		Value: v,
+	}
+
+	return r, nil
+}
+
+func describeHandler(command *protocol.Command) (ExecutionResult, error) {
+	partitionName := command.Partition
+
+	p, ok := partitions.GetPartition(partitionName)
+	if !ok {
+		return ExecutionResult{
+			Type:  ResultError,
+			Value: partitions.ErrPartitionNotFound.Error(),
+		}, nil
+	}
+
+	v := p.Describe()
+
+	r := ExecutionResult{
+		Type:  ResultArray,
 		Value: v,
 	}
 

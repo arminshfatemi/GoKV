@@ -37,9 +37,9 @@ func (p *Parser) Parse(line []byte) (*Command, error) {
 	case bytes.EqualFold(tokens[0], []byte("LIST")):
 		return parseList(tokens)
 
-		//case bytes.EqualFold(tokens[0], []byte("DESCRIBE")):
-		//	return parseDescribe(tokens)
-		//
+	case bytes.EqualFold(tokens[0], []byte("DESCRIBE")):
+		return parseDescribe(tokens)
+
 	case bytes.EqualFold(tokens[0], []byte("SET")):
 		return parseSet(tokens)
 

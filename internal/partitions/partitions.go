@@ -112,6 +112,21 @@ func (p *Partition) Incr(key string) (int64, error) {
 	return v, nil
 }
 
+func (p *Partition) Describe() []string {
+	p.Lock.Lock()
+	defer p.Lock.Unlock()
+
+	cfg := p.cfg
+
+	s := []string{
+		"name", cfg.Name,
+		"schema", cfg.Schema.String(),
+		"persisMode", cfg.PersistMode.String(),
+	}
+
+	return s
+}
+
 func (p *Partition) setInt(key string, rawValue []byte) error {
 	intValue, err := strconv.ParseInt(string(rawValue), 10, 64)
 	if err != nil {

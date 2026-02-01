@@ -37,19 +37,17 @@ func parseList(t [][]byte) (*Command, error) {
 	return &Command{Type: CmdListPartitions}, nil
 }
 
-// // DESCRIBE PARTITION P0
-//
-//	func parseDescribe(t [][]byte) (*Command, error) {
-//		if len(t) != 3 || !bytes.EqualFold(t[1], []byte("PARTITION")) {
-//			return nil, ErrWrongArgCount
-//		}
-//
-//		return &Command{
-//			Schema:      CmdDescribePartition,
-//			Partition: string(t[2]),
-//		}, nil
-//	}
-//
+// DESCRIBE PARTITION P0
+func parseDescribe(t [][]byte) (*Command, error) {
+	if len(t) != 3 || !bytes.EqualFold(t[1], []byte("PARTITION")) {
+		return nil, ErrWrongArgCount
+	}
+
+	return &Command{
+		Type:      CmdDescribePartition,
+		Partition: string(t[2]),
+	}, nil
+}
 
 // SET P0 key value
 func parseSet(t [][]byte) (*Command, error) {
@@ -66,7 +64,6 @@ func parseSet(t [][]byte) (*Command, error) {
 }
 
 // GET P0 key
-
 func parseGet(t [][]byte) (*Command, error) {
 	if len(t) != 3 {
 		return nil, ErrWrongArgCount
