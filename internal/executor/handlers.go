@@ -252,7 +252,7 @@ func statsHandler(command *protocol.Command) (ExecutionResult, error) {
 		}, nil
 	}
 
-	stats := p.Stats
+	stats := p.Stat()
 
 	return ExecutionResult{
 		Type:  ResultArray,
