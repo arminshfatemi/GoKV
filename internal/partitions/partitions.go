@@ -171,20 +171,29 @@ func (p *Partition) Stat() []string {
 	}
 }
 
-func (p *Partition) Exists(key string) bool {
-	var existed bool
-
+func (p *Partition) Exists(keys [][]byte) (exitedCount int64) {
 	p.Lock.RLock()
 	defer p.Lock.RUnlock()
 
 	switch p.Schema {
 	case INT:
-		_, existed = p.IntData[key]
+		for _, kBytes := range keys {
+			key := string(kBytes)
+			_, existed := p.IntData[key]
+			if existed {
+				exitedCount++
+			}
+		}
 	case STRING:
-		_, existed = p.StringData[key]
+		for _, kBytes := range keys {
+			key := string(kBytes)
+			_, existed := p.StringData[key]
+			if existed {
+				exitedCount++
+			}
+		}
 	}
-
-	return existed
+	return exitedCount
 }
 
 func (p *Partition) setInt(key string, rawValue []byte) error {

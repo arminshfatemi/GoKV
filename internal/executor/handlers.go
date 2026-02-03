@@ -172,7 +172,7 @@ func setHandler(command *protocol.Command) ExecutionResult {
 
 func delHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
-	
+
 	p, ok := partitions.GetPartition(string(partitionName))
 	if !ok {
 		return ExecutionResult{
@@ -259,7 +259,7 @@ func statsHandler(command *protocol.Command) ExecutionResult {
 
 func existsHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
-	key := string(command.Args[0])
+	keys := command.Args
 
 	p, ok := partitions.GetPartition(string(partitionName))
 	if !ok {
