@@ -62,11 +62,12 @@ func (p *Partition) Del(key string) bool {
 	return existed
 }
 
-func (p *Partition) BulkDel(keys []string) (removedCount int64) {
+func (p *Partition) BulkDel(keys [][]byte) (removedCount int64) {
 	p.Lock.Lock()
 	switch p.Schema {
 	case INT:
-		for _, key := range keys {
+		for _, kBytes := range keys {
+			key := string(kBytes)
 			_, existed := p.IntData[key]
 			if existed {
 				delete(p.IntData, key)
@@ -74,7 +75,8 @@ func (p *Partition) BulkDel(keys []string) (removedCount int64) {
 			}
 		}
 	case STRING:
-		for _, key := range keys {
+		for _, kBytes := range keys {
+			key := string(kBytes)
 			_, existed := p.StringData[key]
 			if existed {
 				delete(p.StringData, key)

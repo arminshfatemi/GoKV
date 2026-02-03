@@ -172,12 +172,7 @@ func setHandler(command *protocol.Command) ExecutionResult {
 
 func delHandler(command *protocol.Command) ExecutionResult {
 	partitionName := command.Partition
-
-	keys := make([]string, 0, len(command.Args))
-	for _, arg := range command.Args {
-		keys = append(keys, string(arg))
-	}
-
+	
 	p, ok := partitions.GetPartition(string(partitionName))
 	if !ok {
 		return ExecutionResult{
@@ -186,7 +181,7 @@ func delHandler(command *protocol.Command) ExecutionResult {
 		}
 	}
 
-	count := p.BulkDel(keys)
+	count := p.BulkDel(command.Args)
 
 	return ExecutionResult{
 		Type:  ResultInt,
