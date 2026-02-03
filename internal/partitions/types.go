@@ -1,6 +1,9 @@
 package partitions
 
-import "strings"
+import (
+	"bytes"
+	"strings"
+)
 
 type ValueType uint8
 
@@ -12,6 +15,11 @@ const (
 const (
 	INTString    = "INT"
 	STRINGString = "STRING"
+)
+
+var (
+	INTByte    = []byte(INTString)
+	StringByte = []byte(STRINGString)
 )
 
 func (vt ValueType) String() string {
@@ -36,11 +44,27 @@ func ParseValueType(s string) (ValueType, error) {
 	}
 }
 
+func ParseValueTypeBytes(b []byte) (ValueType, error) {
+	switch {
+	case bytes.EqualFold(b, INTByte):
+		return INT, nil
+	case bytes.EqualFold(b, StringByte):
+		return STRING, nil
+	default:
+		return 0, ErrInvalidValueType
+	}
+}
+
 type PersistMode uint8
 
 const (
 	NONE PersistMode = iota
 	WAL
+)
+
+var (
+	NoneByte = []byte("NONE")
+	WALByte  = []byte("WAL")
 )
 
 func (pm PersistMode) String() string {
@@ -59,6 +83,17 @@ func ParsePersistMode(s string) (PersistMode, error) {
 	case "NONE":
 		return NONE, nil
 	case "WAL":
+		return WAL, nil
+	default:
+		return 0, ErrInvalidPersistMode
+	}
+}
+
+func ParsePersistModeBytes(b []byte) (PersistMode, error) {
+	switch {
+	case bytes.EqualFold(b, NoneByte):
+		return NONE, nil
+	case bytes.EqualFold(b, WALByte):
 		return WAL, nil
 	default:
 		return 0, ErrInvalidPersistMode

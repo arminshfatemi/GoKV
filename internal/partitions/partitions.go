@@ -50,6 +50,7 @@ func (p *Partition) Del(key string) bool {
 			delete(p.StringData, key)
 		}
 	}
+	// Unlock early: stats are atomic to keep lock hold time minimal.
 	p.Lock.Unlock()
 
 	if existed {
@@ -59,6 +60,39 @@ func (p *Partition) Del(key string) bool {
 	p.Stats.OpsCount.Add(1)
 
 	return existed
+}
+
+func (p *Partition) BulkDel(keys []string) (removedCount int64) {
+	p.Lock.Lock()
+	switch p.Schema {
+	case INT:
+		for _, key := range keys {
+			_, existed := p.IntData[key]
+			if existed {
+				delete(p.IntData, key)
+				removedCount++
+			}
+		}
+	case STRING:
+		for _, key := range keys {
+			_, existed := p.StringData[key]
+			if existed {
+				delete(p.StringData, key)
+				removedCount++
+			}
+		}
+
+	}
+	// Unlock early: stats are atomic to keep lock hold time minimal.
+	p.Lock.Unlock()
+
+	if removedCount >= 1 {
+		p.Stats.KeysCount.Add(^uint64(removedCount - 1))
+		p.Stats.WritesCount.Add(uint64(removedCount))
+	}
+	p.Stats.OpsCount.Add(1)
+
+	return removedCount
 }
 
 func (p *Partition) Get(key string) (any, bool) {
@@ -92,7 +126,7 @@ func (p *Partition) Incr(key string) (int64, error) {
 	// if not create the key create with value 1
 	if !ok {
 		m[key] = 1
-		p.Lock.Unlock()
+		p.Lock.Unlock() // Unlock early: stats are atomic to keep lock hold time minimal.
 		p.Stats.KeysCount.Add(1)
 		p.Stats.WritesCount.Add(1)
 		p.Stats.OpsCount.Add(1)
@@ -102,7 +136,7 @@ func (p *Partition) Incr(key string) (int64, error) {
 	// if exist increment it and return response
 	v++
 	m[key] = v
-	p.Lock.Unlock()
+	p.Lock.Unlock() // Unlock early: stats are atomic to keep lock hold time minimal.
 	p.Stats.WritesCount.Add(1)
 	p.Stats.OpsCount.Add(1)
 
@@ -160,7 +194,7 @@ func (p *Partition) setInt(key string, rawValue []byte) error {
 	p.Lock.Lock()
 	_, existed := p.IntData[key]
 	p.IntData[key] = intValue
-	p.Lock.Unlock()
+	p.Lock.Unlock() // Unlock early: stats are atomic to keep lock hold time minimal.
 
 	if !existed {
 		p.Stats.KeysCount.Add(1)
@@ -177,7 +211,7 @@ func (p *Partition) setString(key string, rawValue []byte) error {
 	p.Lock.Lock()
 	_, existed := p.StringData[key]
 	p.StringData[key] = strValue
-	p.Lock.Unlock()
+	p.Lock.Unlock() // Unlock early: stats are atomic to keep lock hold time minimal.
 
 	if !existed {
 		p.Stats.KeysCount.Add(1)
