@@ -14,9 +14,10 @@ func parseCreate(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdCreatePartition,
-		Partition: t[2],
-		Args:      t[3:],
+		PartitionKey: string(t[2]),
+		Type:         CmdCreatePartition,
+		Partition:    t[2],
+		Args:         t[3:],
 	}, nil
 }
 
@@ -27,8 +28,9 @@ func parseDrop(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdDropPartition,
-		Partition: t[2],
+		PartitionKey: string(t[2]),
+		Type:         CmdDropPartition,
+		Partition:    t[2],
 	}, nil
 }
 
@@ -47,8 +49,9 @@ func parseDescribe(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdDescribePartition,
-		Partition: t[2],
+		PartitionKey: string(t[2]),
+		Type:         CmdDescribePartition,
+		Partition:    t[2],
 	}, nil
 }
 
@@ -59,9 +62,10 @@ func parseSet(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdSet,
-		Partition: t[1],
-		Args:      t[2:],
+		PartitionKey: string(t[1]),
+		Type:         CmdSet,
+		Partition:    t[1],
+		Args:         t[2:],
 	}, nil
 }
 
@@ -72,9 +76,10 @@ func parseGet(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdGet,
-		Partition: t[1],
-		Args:      t[2:],
+		PartitionKey: string(t[1]),
+		Type:         CmdGet,
+		Partition:    t[1],
+		Args:         t[2:],
 	}, nil
 }
 
@@ -85,9 +90,10 @@ func parseDel(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdDel,
-		Partition: t[1],
-		Args:      t[2:],
+		PartitionKey: string(t[1]),
+		Type:         CmdDel,
+		Partition:    t[1],
+		Args:         t[2:],
 	}, nil
 }
 
@@ -98,9 +104,10 @@ func parseIncr(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdIncr,
-		Partition: t[1],
-		Args:      t[2:],
+		PartitionKey: string(t[1]),
+		Type:         CmdIncr,
+		Partition:    t[1],
+		Args:         t[2:],
 	}, nil
 }
 
@@ -111,8 +118,9 @@ func parseStats(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdStatsPartition,
-		Partition: t[2],
+		Type:         CmdStatsPartition,
+		PartitionKey: string(t[2]),
+		Partition:    t[2],
 	}, nil
 }
 
@@ -123,8 +131,9 @@ func parseExists(t [][]byte) (*Command, error) {
 	}
 
 	return &Command{
-		Type:      CmdExists,
-		Partition: t[1],
-		Args:      t[2:],
+		PartitionKey: string(t[1]),
+		Type:         CmdExists,
+		Partition:    t[1],
+		Args:         t[2:],
 	}, nil
 }

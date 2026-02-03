@@ -23,19 +23,20 @@ type Partition struct {
 	StringData  map[string]string
 }
 
-func (p *Partition) Set(key string, rawValue []byte) error {
+func (p *Partition) Set(rawKey, rawValue []byte) error {
 	switch p.Schema {
 	case INT:
-		return p.setInt(key, rawValue)
+		return p.setInt(rawKey, rawValue)
 	case STRING:
-		return p.setString(key, rawValue)
+		return p.setString(rawKey, rawValue)
 	default:
 		return ErrInvalidSchema
 	}
 }
 
-func (p *Partition) Del(key string) bool {
+func (p *Partition) Del(rawKey []byte) bool {
 	var existed bool
+	key := string(rawKey)
 
 	p.Lock.Lock()
 	switch p.Schema {
@@ -68,8 +69,7 @@ func (p *Partition) BulkDel(keys [][]byte) (removedCount int64) {
 	case INT:
 		for _, kBytes := range keys {
 			key := string(kBytes)
-			_, existed := p.IntData[key]
-			if existed {
+			if _, ok := p.IntData[key]; ok {
 				delete(p.IntData, key)
 				removedCount++
 			}
@@ -77,9 +77,8 @@ func (p *Partition) BulkDel(keys [][]byte) (removedCount int64) {
 	case STRING:
 		for _, kBytes := range keys {
 			key := string(kBytes)
-			_, existed := p.StringData[key]
-			if existed {
-				delete(p.StringData, key)
+			if _, ok := p.IntData[key]; ok {
+				delete(p.IntData, key)
 				removedCount++
 			}
 		}
@@ -97,11 +96,12 @@ func (p *Partition) BulkDel(keys [][]byte) (removedCount int64) {
 	return removedCount
 }
 
-func (p *Partition) Get(key string) (any, bool) {
+func (p *Partition) Get(rawKey []byte) (any, bool) {
 	p.Stats.OpsCount.Add(1)
+	key := string(rawKey)
 
-	p.Lock.Lock()
-	defer p.Lock.Unlock()
+	p.Lock.RLock()
+	defer p.Lock.RUnlock()
 	switch p.Schema {
 	case INT:
 		v, ok := p.IntData[key]
@@ -114,13 +114,14 @@ func (p *Partition) Get(key string) (any, bool) {
 	}
 }
 
-func (p *Partition) Incr(key string) (int64, error) {
+func (p *Partition) Incr(rawKey []byte) (int64, error) {
 	// check schema to support Int values
 	if p.Schema != INT {
 		return 0, ErrInvalidSchema
 	}
 
 	m := p.IntData
+	key := string(rawKey)
 
 	p.Lock.Lock()
 	v, ok := m[key]
@@ -173,7 +174,6 @@ func (p *Partition) Stat() []string {
 
 func (p *Partition) Exists(keys [][]byte) (exitedCount int64) {
 	p.Lock.RLock()
-	defer p.Lock.RUnlock()
 
 	switch p.Schema {
 	case INT:
@@ -193,14 +193,20 @@ func (p *Partition) Exists(keys [][]byte) (exitedCount int64) {
 			}
 		}
 	}
+	p.Lock.RUnlock()
+
+	p.Stats.OpsCount.Add(1)
+
 	return exitedCount
 }
 
-func (p *Partition) setInt(key string, rawValue []byte) error {
+func (p *Partition) setInt(rawKey, rawValue []byte) error {
 	intValue, err := strconv.ParseInt(string(rawValue), 10, 64)
 	if err != nil {
 		return ErrInvalidValue
 	}
+
+	key := string(rawKey)
 
 	p.Lock.Lock()
 	_, existed := p.IntData[key]
@@ -216,8 +222,9 @@ func (p *Partition) setInt(key string, rawValue []byte) error {
 	return nil
 }
 
-func (p *Partition) setString(key string, rawValue []byte) error {
+func (p *Partition) setString(rawKey, rawValue []byte) error {
 	strValue := string(rawValue)
+	key := string(rawKey)
 
 	p.Lock.Lock()
 	_, existed := p.StringData[key]

@@ -17,7 +17,8 @@ const (
 )
 
 type Command struct {
-	Type      CommandType
-	Partition []byte
-	Args      [][]byte
+	PartitionKey string
+	Type         CommandType
+	Partition    []byte
+	Args         [][]byte
 }
