@@ -1,169 +1,125 @@
 # GoKV
 
-**GoKV** is a lightweight, Redis-inspired key-value database written in **Go**, designed for learning, experimentation, and building a clean storage engine from scratch.
+**GoKV** is an experimental, in-memory key-value database written in **Go**, designed to explore **storage engines**, **concurrency**, and **high-performance backend patterns**.
+The project focuses on **partition-based isolation**, **low-latency operations**, and **production-oriented design tradeoffs**.
 
-The goal of GoKV is **clarity over magic**:
-
-* Simple internal architecture
-* Explicit data structures
-* Clear separation between protocol, execution, storage, and networking
-
-This is **not a Redis clone**, but it borrows proven ideas (RESP protocol, partitions, command execution pipeline).
+> ⚠️ GoKV is a learning and research project. Some features are still under active development.
 
 ---
 
-## ✨ Features (Current)
+## ✨ Key Concepts
 
-* TCP server (Redis-like interface)
-* Command parsing layer
-* Execution layer with command dispatch table
-* In-memory partitions
-* Partition registry (Create / Drop / List)
-* Typed partitions (INT, STRING)
-* Thread-safe operations
-* Redis-compatible RESP responses
+### 🔹 Partitions
+
+Data is organized into **partitions**, each with:
+
+* Its own schema (`INT`, `STRING`)
+* Independent configuration and lifecycle
+* Isolated data and statistics
+
+Partitions allow better separation of concerns, scalability, and future access control.
 
 ---
 
-## 🧱 Architecture Overview
+### 🔹 High-Performance Concurrency Model
+
+* Fine-grained locking at the partition level
+* **Atomic statistics** (Ops, Writes, Keys) to reduce lock contention
+* Early lock release for write-heavy operations (intentional design choice)
+
+This trades strict metric consistency for **higher throughput under load**, similar to real-world systems.
+
+---
+
+### 🔹 Supported Commands (Current)
+
+#### Partition Management
 
 ```
-┌──────────┐
-│  Client  │
-└────┬─────┘
-     │ TCP
-┌────▼─────┐
-│  Server  │   (TCP, bufio)
-└────┬─────┘
-     │
-┌────▼─────┐
-│ Protocol │   (Parse commands)
-└────┬─────┘
-     │
-┌────▼─────┐
-│ Executor │   (Command → Handler)
-└────┬─────┘
-     │
-┌────▼─────┐
-│Partition │   (In-memory storage)
-└────┬─────┘
-     │
-┌────▼─────┐
-│  Writer  │   (RESP output)
-└──────────┘
-```
-
-Each layer has **one job** and no hidden side effects.
-
----
-
-## 🧩 Partitions
-
-A **partition** is an isolated key-value namespace with:
-
-* Name
-* Schema (value type)
-* Persistence mode (future: WAL, snapshots)
-* Internal locking
-* Statistics tracking
-
-### Supported schemas
-
-* `INT`
-* `STRING`
-
-Each partition enforces **one value type**, keeping storage fast and predictable.
-
----
-
-## 📜 Supported Commands
-
-### Partition Management
-
-```text
-CREATE PARTITION <name> <TYPE> <PERSIST>
+CREATE PARTITION <name> <schema> <persist_mode>
 DROP PARTITION <name>
 LIST PARTITIONS
+DESCRIBE PARTITION <name>
+STATS PARTITION <name>
 ```
 
-Examples:
-
-```text
-CREATE PARTITION users INT NONE
-LIST PARTITIONS
-```
-
-RESP output (example):
+#### Data Operations
 
 ```
-*1
-$5
-users
+SET <partition> <key> <value>
+GET <partition> <key>
+DEL <partition> <key> [key...]
+INCR <partition> <key>
+EXISTS <partition> <key> [key...]
 ```
+
+* `DEL` and `EXISTS` support **bulk operations**
+* Operations are schema-aware and validated per partition
 
 ---
 
-## 🧪 Running the Server
+## 📊 Statistics
 
-```bash
-go run cmd/server/main.go
-```
+Each partition maintains atomic counters:
 
-Server listens on:
+* Total operations
+* Write operations
+* Current key count
 
-```
-:6379
-```
-
-Test with `nc`:
-
-```bash
-nc localhost 6379
-```
+Stats are **eventually consistent by design** to minimize contention in hot paths.
 
 ---
 
-## 🧠 Design Philosophy
+## 🔐 Authentication & Authorization (Planned / In Progress)
 
-* Prefer **explicit types** over `any`
-* Fail early on invalid commands
-* Keep execution logic out of the network layer
-* Make every component testable in isolation
-* Avoid premature optimization — correctness first
+GoKV is evolving toward a **production-like security model**.
 
----
+### Planned features:
 
-## 🚧 Roadmap
+* User authentication (`LOGIN / AUTH`)
+* Connection-bound sessions
+* **Partition-level permissions**
 
-Planned features:
+    * `READ` (GET, EXISTS, STATS)
+    * `WRITE` (SET, DEL, INCR)
+    * `ADMIN` (CREATE/DROP partitions, ACL management)
+* Admin-only partition creation
+* Default-deny access model
 
-* [ ] SET / GET / DEL commands
-* [ ] Single-map storage model
-* [ ] Write-Ahead Log (WAL)
-* [ ] Snapshots
-* [ ] TTL support
-* [ ] Binary protocol parsing
-* [ ] Benchmarks
-* [ ] Persistence recovery
+This design aims to support **multi-tenant** and **sensitive-data** use cases.
 
 ---
 
-## ⚠️ Disclaimer
+## 🧪 Design Goals
 
-GoKV is a **learning project**, not production-ready software.
-Expect breaking changes as the internals evolve.
-
----
-
-## 🤝 Contributing
-
-This project is currently experimental and evolving fast.
-Ideas, discussions, and feedback are welcome.
+* Understand database internals through implementation
+* Explore real-world tradeoffs (consistency vs performance)
+* Build systems that behave well under **high load and stress**
+* Keep the codebase readable and intentional
 
 ---
 
-## 📝 License
+## 🛠 Tech Stack
 
-MIT
+* Language: **Go**
+* Concurrency: `sync.Mutex`, atomic counters
+* Protocol: Custom text-based command protocol
+* Architecture: Partition-based, modular executor & parser
 
+---
+
+## 🚧 Current Status
+
+* Core command execution ✔
+* Partition lifecycle ✔
+* Bulk operations ✔
+* Atomic stats ✔
+* Authentication & ACL ❌ (in progress)
+
+---
+
+## 📌 Notes
+
+This project is not intended to replace Redis or similar databases.
+It is a hands-on exploration of **how such systems can be built** and the engineering decisions behind them.
 
