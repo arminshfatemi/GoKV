@@ -269,12 +269,7 @@ func existsHandler(command *protocol.Command) ExecutionResult {
 		}
 	}
 
-	e := p.Exists(key)
-
-	var count int64
-	if e {
-		count = 1
-	}
+	count := p.Exists(keys)
 
 	r := ExecutionResult{
 		Type:  ResultInt,
