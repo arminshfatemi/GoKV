@@ -2,20 +2,23 @@ package tcp
 
 import (
 	"GoKV/internal/auth"
+	"GoKV/internal/config"
 	"log"
 	"net"
 )
 
 type Server struct {
-	addr string
+	cfg *config.Config
 }
 
-func NewServer(addr string) *Server {
-	return &Server{addr: addr}
+func NewServer(config *config.Config) *Server {
+	return &Server{cfg: config}
 }
 
 func (s *Server) Start() error {
-	ln, err := net.Listen("tcp", s.addr)
+	adr := s.cfg.Server.Address
+
+	ln, err := net.Listen("tcp", adr)
 	if err != nil {
 		return err
 	}
@@ -26,7 +29,7 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	log.Printf("TCP server listening on %s\n", s.addr)
+	log.Printf("TCP server listening on %s\n", adr)
 
 	for {
 		conn, err := ln.Accept()
