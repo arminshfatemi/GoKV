@@ -1,6 +1,7 @@
 package tcp
 
 import (
+	"GoKV/internal/auth"
 	"log"
 	"net"
 )
@@ -20,6 +21,11 @@ func (s *Server) Start() error {
 	}
 	defer ln.Close()
 
+	authStore, err := auth.NewStore()
+	if err != nil {
+		return err
+	}
+
 	log.Printf("TCP server listening on %s\n", s.addr)
 
 	for {
@@ -29,6 +35,6 @@ func (s *Server) Start() error {
 			continue
 		}
 
-		go handleConnection(conn)
+		go handleConnection(conn, authStore)
 	}
 }
