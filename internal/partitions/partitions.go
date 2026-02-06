@@ -77,8 +77,8 @@ func (p *Partition) BulkDel(keys [][]byte) (removedCount int64) {
 	case STRING:
 		for _, kBytes := range keys {
 			key := string(kBytes)
-			if _, ok := p.IntData[key]; ok {
-				delete(p.IntData, key)
+			if _, ok := p.StringData[key]; ok {
+				delete(p.StringData, key)
 				removedCount++
 			}
 		}
