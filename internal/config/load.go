@@ -5,7 +5,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 var ErrInvalidFileType = errors.New("config file must be .json")

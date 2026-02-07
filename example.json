@@ -1,0 +1,16 @@
+{
+  "server": {
+    "address": ""
+  },
+  "auth": {
+    "enable": true,
+    "salt_file": "salt.txt"
+  },
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
+    }
+  ]
+}

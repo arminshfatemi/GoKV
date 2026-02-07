@@ -24,7 +24,7 @@ func (s *Server) Start() error {
 	}
 	defer ln.Close()
 
-	authStore, err := auth.NewStore()
+	authStore, err := auth.NewStore(s.cfg.Auth.SaltFile)
 	if err != nil {
 		return err
 	}
