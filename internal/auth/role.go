@@ -1,5 +1,7 @@
 package auth
 
+import "strings"
+
 type Role uint8
 
 const (
@@ -7,6 +9,13 @@ const (
 	RoleReader
 	RoleOperator
 	RoleAdmin
+)
+
+const (
+	StrRoleNone     = "None"
+	StrRoleReader   = "Reader"
+	StrRoleOperator = "Operator"
+	StrRoleAdmin    = "Admin"
 )
 
 func (r Role) String() string {
@@ -19,5 +28,18 @@ func (r Role) String() string {
 		return "admin"
 	default:
 		return "none"
+	}
+}
+
+func ParseRoleStr(r string) Role {
+	switch strings.ToUpper(r) {
+	case StrRoleReader:
+		return RoleReader
+	case StrRoleOperator:
+		return RoleOperator
+	case StrRoleAdmin:
+		return RoleAdmin
+	default:
+		return RoleNone
 	}
 }

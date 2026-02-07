@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"GoKV/internal/config"
 	"crypto/sha256"
 	"crypto/subtle"
 	"errors"
@@ -78,6 +79,13 @@ func (s *Store) hashPassword(password []byte) [32]byte {
 	var out [32]byte
 	copy(out[:], h.Sum(out[:0]))
 	return out
+}
+
+func (s *Store) AddUsersFromConfig(users []config.UserConfig) {
+	for _, user := range users {
+		role := ParseRoleStr(user.Role)
+		s.AddUser(user.Username, []byte(user.Password), role)
+	}
 }
 
 func loadSaltFromFile(filePath string) ([]byte, error) {

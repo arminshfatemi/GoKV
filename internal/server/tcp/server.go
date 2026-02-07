@@ -29,6 +29,8 @@ func (s *Server) Start() error {
 		return err
 	}
 
+	authStore.AddUsersFromConfig(s.cfg.Users)
+
 	log.Printf("TCP server listening on %s\n", adr)
 
 	for {
