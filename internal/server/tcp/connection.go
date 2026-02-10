@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"GoKV/internal/auth"
+	"GoKV/internal/commands"
 	"GoKV/internal/executor"
 	"GoKV/internal/protocol"
 	writer2 "GoKV/internal/writer"
@@ -37,7 +38,7 @@ func handleConnection(conn net.Conn, store *auth.Store) {
 			continue
 		}
 
-		if cmd.Type == protocol.CmdAuthentication {
+		if cmd.Type == commands.CmdAuthentication {
 			user, ok := store.Authenticate(string(cmd.Args[0]), cmd.Args[1])
 			if !ok {
 				writer.WriteString("-invalid credentials\n")

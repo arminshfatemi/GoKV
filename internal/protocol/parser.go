@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"GoKV/internal/commands"
 	"bytes"
 	"errors"
 )
@@ -34,7 +35,7 @@ func NewParser() *Parser {
 	}
 }
 
-func (p *Parser) Parse(line []byte) (*Command, error) {
+func (p *Parser) Parse(line []byte) (*commands.Command, error) {
 	tokens := p.tokenizer.Tokenize(line)
 	if len(tokens) == 0 {
 		return nil, ErrEmptyCommand

@@ -1,4 +1,4 @@
-package protocol
+package commands
 
 type CommandType uint8
 

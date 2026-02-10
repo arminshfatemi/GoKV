@@ -1,13 +1,15 @@
 package executor
 
-import "GoKV/internal/protocol"
+import (
+	"GoKV/internal/commands"
+)
 
 type Executor struct {
-	command *protocol.Command
+	command *commands.Command
 	handler CommandHandler
 }
 
-func NewExecutor(command *protocol.Command) (*Executor, error) {
+func NewExecutor(command *commands.Command) (*Executor, error) {
 	// find the handler for this command
 	h, ok := CommandTable[command.Type]
 	if !ok {

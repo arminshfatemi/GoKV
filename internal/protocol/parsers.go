@@ -1,6 +1,9 @@
 package protocol
 
-import "bytes"
+import (
+	"GoKV/internal/commands"
+	"bytes"
+)
 
 var (
 	partition  = []byte("PARTITION")
@@ -8,12 +11,12 @@ var (
 )
 
 // CREATE PARTITION P0 INT WAL
-func parseCreate(t [][]byte) (*Command, error) {
+func parseCreate(t [][]byte) (*commands.Command, error) {
 	if len(t) != 5 || !bytes.EqualFold(t[1], partition) {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[2]),
 		Type:         CmdCreatePartition,
 		Partition:    t[2],
@@ -22,12 +25,12 @@ func parseCreate(t [][]byte) (*Command, error) {
 }
 
 // DROP PARTITION P0
-func parseDrop(t [][]byte) (*Command, error) {
+func parseDrop(t [][]byte) (*commands.Command, error) {
 	if len(t) != 3 || !bytes.EqualFold(t[1], partition) {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[2]),
 		Type:         CmdDropPartition,
 		Partition:    t[2],
@@ -35,7 +38,7 @@ func parseDrop(t [][]byte) (*Command, error) {
 }
 
 // LIST PARTITIONS
-func parseList(t [][]byte) (*Command, error) {
+func parseList(t [][]byte) (*commands.Command, error) {
 	if len(t) != 2 || !bytes.EqualFold(t[1], partitions) {
 		return nil, ErrWrongArgCount
 	}
@@ -43,12 +46,12 @@ func parseList(t [][]byte) (*Command, error) {
 }
 
 // DESCRIBE PARTITION P0
-func parseDescribe(t [][]byte) (*Command, error) {
+func parseDescribe(t [][]byte) (*commands.Command, error) {
 	if len(t) != 3 || !bytes.EqualFold(t[1], partition) {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[2]),
 		Type:         CmdDescribePartition,
 		Partition:    t[2],
@@ -56,12 +59,12 @@ func parseDescribe(t [][]byte) (*Command, error) {
 }
 
 // SET P0 key value
-func parseSet(t [][]byte) (*Command, error) {
+func parseSet(t [][]byte) (*commands.Command, error) {
 	if len(t) != 4 {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[1]),
 		Type:         CmdSet,
 		Partition:    t[1],
@@ -70,12 +73,12 @@ func parseSet(t [][]byte) (*Command, error) {
 }
 
 // GET P0 key
-func parseGet(t [][]byte) (*Command, error) {
+func parseGet(t [][]byte) (*commands.Command, error) {
 	if len(t) != 3 {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[1]),
 		Type:         CmdGet,
 		Partition:    t[1],
@@ -84,12 +87,12 @@ func parseGet(t [][]byte) (*Command, error) {
 }
 
 // DEL P0 key
-func parseDel(t [][]byte) (*Command, error) {
+func parseDel(t [][]byte) (*commands.Command, error) {
 	if len(t) < 3 {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[1]),
 		Type:         CmdDel,
 		Partition:    t[1],
@@ -98,12 +101,12 @@ func parseDel(t [][]byte) (*Command, error) {
 }
 
 // INCR P0 key
-func parseIncr(t [][]byte) (*Command, error) {
+func parseIncr(t [][]byte) (*commands.Command, error) {
 	if len(t) != 3 {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[1]),
 		Type:         CmdIncr,
 		Partition:    t[1],
@@ -112,12 +115,12 @@ func parseIncr(t [][]byte) (*Command, error) {
 }
 
 // STATS PARTITION P0
-func parseStats(t [][]byte) (*Command, error) {
+func parseStats(t [][]byte) (*commands.Command, error) {
 	if len(t) != 3 || !bytes.EqualFold(t[1], partition) {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		Type:         CmdStatsPartition,
 		PartitionKey: string(t[2]),
 		Partition:    t[2],
@@ -125,12 +128,12 @@ func parseStats(t [][]byte) (*Command, error) {
 }
 
 // EXISTS <partition> <key> [key...]
-func parseExists(t [][]byte) (*Command, error) {
+func parseExists(t [][]byte) (*commands.Command, error) {
 	if len(t) <= 2 {
 		return nil, ErrWrongArgCount
 	}
 
-	return &Command{
+	return &commands.Command{
 		PartitionKey: string(t[1]),
 		Type:         CmdExists,
 		Partition:    t[1],

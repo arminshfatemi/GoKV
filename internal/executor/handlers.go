@@ -1,34 +1,34 @@
 package executor
 
 import (
+	"GoKV/internal/commands"
 	"GoKV/internal/partitions"
-	"GoKV/internal/protocol"
 )
 
-type CommandHandler func(command *protocol.Command) ExecutionResult
+type CommandHandler func(command *commands.Command) ExecutionResult
 
-var CommandTable = map[protocol.CommandType]CommandHandler{}
+var CommandTable = map[commands.CommandType]CommandHandler{}
 
 func init() {
-	addHandler(protocol.CmdCreatePartition, createPartitionHandler)
-	addHandler(protocol.CmdListPartitions, listPartitionHandler)
-	addHandler(protocol.CmdDropPartition, dropPartitionHandler)
-	addHandler(protocol.CmdDescribePartition, describeHandler)
-	addHandler(protocol.CmdStatsPartition, statsHandler)
+	addHandler(commands.CmdCreatePartition, CreatePartitionHandler)
+	addHandler(commands.CmdListPartitions, listPartitionHandler)
+	addHandler(commands.CmdDropPartition, dropPartitionHandler)
+	addHandler(commands.CmdDescribePartition, describeHandler)
+	addHandler(commands.CmdStatsPartition, statsHandler)
 
-	addHandler(protocol.CmdDel, delHandler)
-	addHandler(protocol.CmdGet, getHandler)
-	addHandler(protocol.CmdSet, setHandler)
-	addHandler(protocol.CmdIncr, incrHandler)
-	addHandler(protocol.CmdExists, existsHandler)
+	addHandler(commands.CmdDel, delHandler)
+	addHandler(commands.CmdGet, getHandler)
+	addHandler(commands.CmdSet, setHandler)
+	addHandler(commands.CmdIncr, incrHandler)
+	addHandler(commands.CmdExists, existsHandler)
 }
 
-func addHandler(commandType protocol.CommandType, handler CommandHandler) {
+func addHandler(commandType commands.CommandType, handler CommandHandler) {
 	CommandTable[commandType] = handler
 }
 
-func createPartitionHandler(command *protocol.Command) ExecutionResult {
-	if command.Type != protocol.CmdCreatePartition {
+func CreatePartitionHandler(command *commands.Command) ExecutionResult {
+	if command.Type != commands.CmdCreatePartition {
 		panic("createPartitionHandler called with wrong command type")
 	}
 
@@ -72,8 +72,8 @@ func createPartitionHandler(command *protocol.Command) ExecutionResult {
 	return r
 }
 
-func listPartitionHandler(command *protocol.Command) ExecutionResult {
-	if command.Type != protocol.CmdListPartitions {
+func listPartitionHandler(command *commands.Command) ExecutionResult {
+	if command.Type != commands.CmdListPartitions {
 		panic("listPartitionHandler called with wrong command type")
 	}
 
@@ -88,8 +88,8 @@ func listPartitionHandler(command *protocol.Command) ExecutionResult {
 	return r
 }
 
-func dropPartitionHandler(command *protocol.Command) ExecutionResult {
-	if command.Type != protocol.CmdDropPartition {
+func dropPartitionHandler(command *commands.Command) ExecutionResult {
+	if command.Type != commands.CmdDropPartition {
 		panic("dropPartitionHandler called with wrong command type")
 	}
 
@@ -110,7 +110,7 @@ func dropPartitionHandler(command *protocol.Command) ExecutionResult {
 	return r
 }
 
-func getHandler(command *protocol.Command) ExecutionResult {
+func getHandler(command *commands.Command) ExecutionResult {
 	// get partition
 	p, ok := partitions.GetPartition(command.PartitionKey)
 	if !ok {
@@ -140,7 +140,7 @@ func getHandler(command *protocol.Command) ExecutionResult {
 	return r
 }
 
-func setHandler(command *protocol.Command) ExecutionResult {
+func setHandler(command *commands.Command) ExecutionResult {
 	p, ok := partitions.GetPartition(command.PartitionKey)
 	if !ok {
 		return ExecutionResult{
@@ -163,7 +163,7 @@ func setHandler(command *protocol.Command) ExecutionResult {
 	return r
 }
 
-func delHandler(command *protocol.Command) ExecutionResult {
+func delHandler(command *commands.Command) ExecutionResult {
 	p, ok := partitions.GetPartition(command.PartitionKey)
 	if !ok {
 		return ExecutionResult{
@@ -180,7 +180,7 @@ func delHandler(command *protocol.Command) ExecutionResult {
 	}
 }
 
-func incrHandler(command *protocol.Command) ExecutionResult {
+func incrHandler(command *commands.Command) ExecutionResult {
 	p, ok := partitions.GetPartition(command.PartitionKey)
 	if !ok {
 		return ExecutionResult{
@@ -205,7 +205,7 @@ func incrHandler(command *protocol.Command) ExecutionResult {
 	return r
 }
 
-func describeHandler(command *protocol.Command) ExecutionResult {
+func describeHandler(command *commands.Command) ExecutionResult {
 	p, ok := partitions.GetPartition(command.PartitionKey)
 	if !ok {
 		return ExecutionResult{
@@ -224,7 +224,7 @@ func describeHandler(command *protocol.Command) ExecutionResult {
 	return r
 }
 
-func statsHandler(command *protocol.Command) ExecutionResult {
+func statsHandler(command *commands.Command) ExecutionResult {
 	p, ok := partitions.GetPartition(command.PartitionKey)
 	if !ok {
 		return ExecutionResult{
@@ -241,7 +241,7 @@ func statsHandler(command *protocol.Command) ExecutionResult {
 	}
 }
 
-func existsHandler(command *protocol.Command) ExecutionResult {
+func existsHandler(command *commands.Command) ExecutionResult {
 	p, ok := partitions.GetPartition(command.PartitionKey)
 	if !ok {
 		return ExecutionResult{
