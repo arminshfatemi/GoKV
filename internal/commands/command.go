@@ -11,6 +11,7 @@ const (
 	CmdDropPartition
 	CmdListPartitions
 	CmdDescribePartition
+	CmdStatsPartition
 
 	// Partitions operations
 
@@ -18,7 +19,6 @@ const (
 	CmdGet
 	CmdDel
 	CmdIncr
-	CmdStatsPartition
 	CmdExists
 
 	// Auth
@@ -29,6 +29,5 @@ const (
 type Command struct {
 	PartitionKey string
 	Type         CommandType
-	Partition    []byte
 	Args         [][]byte
 }

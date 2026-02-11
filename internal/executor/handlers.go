@@ -94,7 +94,7 @@ func dropPartitionHandler(command *commands.Command) ExecutionResult {
 	}
 
 	// list the partitions
-	err := partitions.DropPartition(string(command.Partition))
+	err := partitions.DropPartition(command.PartitionKey)
 	if err != nil {
 		return ExecutionResult{
 			Type:  ResultError,
